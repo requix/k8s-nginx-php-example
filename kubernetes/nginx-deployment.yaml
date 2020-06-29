@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: nginx
+        tier: backend
+    spec:
+      volumes:
+      - name: code
+        persistentVolumeClaim:
+          claimName: code
+      - name: sockdata
+        persistentVolumeClaim:
+          claimName: sockdata
+      - name: config
+        configMap:
+          name: nginx-config
+          items:
+          - key: config
+            path: site.conf      
+      hostNetwork: true
+      containers:
+      - name: nginx
+        image: 326424591301.dkr.ecr.eu-central-1.amazonaws.com/requix-custom-nginx:version-1.0.0
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: code
+          mountPath: /code
+        - name: sockdata
+          mountPath: /socket
+        - name: config
+          mountPath: /etc/nginx/conf.d      

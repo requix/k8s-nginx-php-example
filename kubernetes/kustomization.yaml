@@ -1,0 +1,9 @@
+resources:
+  - code-volume.yaml
+  - socket-volume.yaml
+  - nginx-service.yaml
+  - php-service.yaml
+  - nginx-deployment.yaml
+  - php-deployment.yaml
+  - nginx_configMap.yaml
+  - php_configMap.yaml

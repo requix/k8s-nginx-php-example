@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php
+  labels:
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: php
+        tier: backend
+    spec:
+      volumes:
+      - name: code
+        persistentVolumeClaim:
+          claimName: code
+      - name: sockdata
+        persistentVolumeClaim:
+          claimName: sockdata
+      - name: config
+        configMap:
+          name: php-config
+          items:
+          - key: config
+            path: www.conf
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: php
+        image: 326424591301.dkr.ecr.eu-central-1.amazonaws.com/requix-custom-php:version-1.0.0
+        volumeMounts:
+        - name: code
+          mountPath: /code
+        - name: sockdata
+          mountPath: /socket
+      initContainers:
+      - name: install
+        image: busybox
+        volumeMounts:
+        - name: code
+          mountPath: /code
+        - name: sockdata
+          mountPath: /socket
+        - name: config
+          mountPath: /usr/local/etc/php-fpm.d
+        command:      
+        - wget
+        - "-O"
+        - "/code/index.php"
+        - https://raw.githubusercontent.com/do-community/php-kubernetes/master/index.php
